@@ -109,7 +109,7 @@ CREATE TABLE ReturnDelay (
     Description VARCHAR(30) NOT NULL,
     AmountPerDay NUMERIC NOT NULL,
     DurationInDays INT NOT NULL
-);
+); 
 --PROCEDURES
 
 CREATE OR REPLACE PROCEDURE MakeBookLoan(CopyOfBookId INT, LibraryMemberId INT)
