@@ -34,14 +34,16 @@ CREATE TABLE Libraries(
 	Name VARCHAR(30) NOT NULL,
 	StartWorkTime TIME,
 	EndWorkTime TIME
-);
+)START WITH 1;
+
 --StartWorkTime<EndWorkTime
 CREATE TABLE Countries(
 	CountryId SERIAL PRIMARY KEY,
 	Name VARCHAR(30) NOT NULL,
 	Population INT,
 	AverageSalary NUMERIC
-);
+)START WITH 1;
+	
 --population >0
 --average salary>0
 
@@ -51,14 +53,15 @@ CREATE TABLE Librarians(
 	Name VARCHAR(30) NOT NULL,
 	Surname VARCHAR(30) NOT NULL,
 	LibraryId INT REFERENCES Libraries(LibraryId)
-);
+)START WITH 1;
 
 CREATE TABLE LibraryMembers(
 	LibraryMemberId SERIAL PRIMARY KEY,
 	Name VARCHAR(30) NOT NULL,
 	Surname VARCHAR(30) NOT NULL,
 	LibraryId INT REFERENCES Libraries(LibraryId)
-);
+)START WITH 1;
+
 
 CREATE TABLE Authors(
 	AuthorId SERIAL PRIMARY KEY,
@@ -67,21 +70,21 @@ CREATE TABLE Authors(
 	DateOfBirth DATE NOT NULL,
 	CountryId INT REFERENCES Countries(CountryId),
 	GenderId INT REFERENCES Genders(GenderId);
-);
+)START WITH 1;
 
 CREATE TABLE Books(
 	BookId SERIAL PRIMARY KEY,
 	Name VARCHAR(30) NOT NULL,
-	BookTypeId INT REFERENCES BookTypes(BookTypeId)
-);
+	BookTypeId INT REFERENCES BookTypes(BookTypeId),
+	PublicationDate DATE CHECK (PublicationDate >= '1500-01-01')
+)START WITH 1;
 
 CREATE TABLE CopyOfBooks(
 	CopyOfBookId SERIAL PRIMARY KEY,
-	Availability BOOL NOT NULL,
-	
+	Availability BOOL DEFAULT true,
 	BookId INT REFERENCES Books(BookId),
 	LibraryId INT REFERENCES Libraries(LibraryId)
-);
+)START WITH 1;
 
 --connect books and authors
 CREATE TABLE BookAuthors(
@@ -99,6 +102,8 @@ CREATE TABLE BookBorrowings (
 	BorrowDate DATE DEFAULT CURRENT_DATE,
    	DueDate DATE DEFAULT (CURRENT_DATE + INTERVAL '20' DAY),
 	CHECK (DueDate >= BorrowDate + INTERVAL '20' DAY AND DueDate <= BorrowDate + INTERVAL '60' DAY)
+	
+    TariffId INT REFERENCES Tariffs(TariffId),
 );
 
 CREATE TABLE ReturnDelay (
@@ -109,4 +114,20 @@ CREATE TABLE ReturnDelay (
     AmountPerDay NUMERIC NOT NULL,
     DurationInDays INT NOT NULL
 );
+
+--PROCEDURES
+
+CREATE OR REPLACE PROCEDURE MakeBookLoan(CopyOfBookId INT, LibraryMemberId INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE CopyOfBooks
+    SET Availability = FALSE
+    WHERE CopyOfBooks.CopyOfBookId = MakeBookLoan.CopyOfBookId; 
+
+    INSERT INTO BookBorrowings (CopyOfBookId, LibraryMemberId, BorrowDate, TariffId)
+    VALUES (CopyOfBookId, LibraryMemberId, NOW()::DATE, 1); 
+END;
+$$;
+
 	
