@@ -10,10 +10,24 @@ CREATE TABLE AuthorshipTypes(
 	AuthorshipTypeId SERIAL PRIMARY KEY,
 	TypeOfAuthorship VARCHAR(30) NOT NULL
 );
+CREATE TABLE Tariffs(
+	TariffId SERIAL PRIMARY KEY,
+	TariffType VARCHAR(30) NOT NULL,
+	TarriffStart DATE,
+	TarriffEnd DATE,
+	
+	TariffWorkDayPrice NUMERIC NOT NULL,
+	TariffWeekendPrice NUMERIC NOT NULL
+);
 INSERT INTO BookTypes (TypeOfBook) VALUES ('Lektira'),('Umjetnička'),('Znanstvena'),('Biografija'),('Stručna');
 INSERT INTO Genders (Gender) VALUES ('Muškarac'),('Žena'),('Nepoznato'),('Ostalo');
 INSERT INTO AuthorshipTypes (TypeOfAuthorship) VALUES ('Glavni'),('Sporedni');
---------------------------------------------------------------
+
+INSERT INTO Tariffs (TariffType, TarriffStart, TarriffEnd, TariffWorkDayPrice, TariffWeekendPrice)
+VALUES
+    ('Ljetna', '2023-06-01', '2023-09-30', 0.30, 0.20),
+    ('Radna', '2023-10-01', '2023-05-31', 0.40, 0.20);
+------------------------------------------------------------------------------------------------------------------
 --Library
 CREATE TABLE Libraries(
 	LibraryId SERIAL PRIMARY KEY,
@@ -21,13 +35,16 @@ CREATE TABLE Libraries(
 	StartWorkTime TIME,
 	EndWorkTime TIME
 );
-
+--StartWorkTime<EndWorkTime
 CREATE TABLE Countries(
 	CountryId SERIAL PRIMARY KEY,
 	Name VARCHAR(30) NOT NULL,
 	Population INT,
 	AverageSalary NUMERIC
 );
+--population >0
+--average salary>0
+
 --Librarian
 CREATE TABLE Librarians(
 	LibrarianId SERIAL PRIMARY KEY,
@@ -72,5 +89,24 @@ CREATE TABLE BookAuthors(
 	AuthorshipTypeId INT REFERENCES AuthorshipTypes(AuthorshipTypeId),
 	AuthorId INT REFERENCES Authors(AuthorId),
 	BookId INT REFERENCES Books(BookId)
+);
+
+CREATE TABLE BookBorrowings (
+    BookBorrowId SERIAL PRIMARY KEY,
+    CopyOfBookId INT REFERENCES CopyOfBooks(CopyOfBookId),
+    LibraryMemberId INT REFERENCES LibraryMembers(LibraryMemberId),
+    
+	BorrowDate DATE DEFAULT CURRENT_DATE,
+   	DueDate DATE DEFAULT (CURRENT_DATE + INTERVAL '20' DAY),
+	CHECK (DueDate >= BorrowDate + INTERVAL '20' DAY AND DueDate <= BorrowDate + INTERVAL '60' DAY)
+);
+
+CREATE TABLE ReturnDelay (
+    ReturnDelayId SERIAL PRIMARY KEY,
+	TariffId INT REFERENCES Tariffs(TariffId),
+
+    Description VARCHAR(30) NOT NULL,
+    AmountPerDay NUMERIC NOT NULL,
+    DurationInDays INT NOT NULL
 );
 	
