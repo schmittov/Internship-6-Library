@@ -36,7 +36,6 @@ CREATE TABLE Libraries(
 	EndWorkTime TIME
 )START WITH 1;
 
---StartWorkTime<EndWorkTime
 CREATE TABLE Countries(
 	CountryId SERIAL PRIMARY KEY,
 	Name VARCHAR(30) NOT NULL,
@@ -44,9 +43,6 @@ CREATE TABLE Countries(
 	AverageSalary NUMERIC
 )START WITH 1;
 	
---population >0
---average salary>0
-
 --Librarian
 CREATE TABLE Librarians(
 	LibrarianId SERIAL PRIMARY KEY,
@@ -114,7 +110,6 @@ CREATE TABLE ReturnDelay (
     AmountPerDay NUMERIC NOT NULL,
     DurationInDays INT NOT NULL
 );
-
 --PROCEDURES
 
 CREATE OR REPLACE PROCEDURE MakeBookLoan(CopyOfBookId INT, LibraryMemberId INT)
